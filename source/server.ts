@@ -6,6 +6,7 @@ import routes from './routes';
 
 const app: Express = express();
 
+
 /** Logging */
 app.use(morgan('dev'));
 /** Parse the request */
