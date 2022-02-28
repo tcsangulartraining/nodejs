@@ -1,9 +1,11 @@
 var http = require("http");
 var express = require('express');
 var app = express();
-var fs = require("fs");
+var fs = require("fs-extra");
 var mongoose = require('mongoose');
-var socketIO = require('socket.io');
+const multer  = require('multer');
+const bodyParser= require('body-parser');
+const upload = multer({ dest: 'tmp/' })
 var jwt = require('jsonwebtoken');
 var employeeModel = require("./source/models/employee");
 var auth = require("./source/middleware/auth");
@@ -24,6 +26,7 @@ const httpServer = http.createServer(app);
 
 /** Takes care of JSON data */
 app.use(express.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.get('/listUsers', function (req, res) {
     fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
@@ -67,6 +70,22 @@ app.get('/listUsers', function (req, res) {
   const token = jwt.sign(data, JWT_SECRET_KEY);
 
   res.send(token);
+});
+
+app.post('/fileUploader', upload.single('file'), function (req, res) {
+  // req.file is the name of your file in the form above, here 'uploaded_file'
+  // req.body will hold the text fields, if there were any 
+  console.log(req.file, req.body);
+  if (req.file) {
+    const path_temp = req.file.path;
+    const filePath = 'uploads/' + req.file.originalname;
+    fs.move(path_temp, filePath, function(err) {
+        if (err) return console.error(err)
+        res.send("File uploaded!");
+    });
+  } else {
+    res.send("File upload failed!");
+  }  
 });
 
 // Initialising Server in port 3000
