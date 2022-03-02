@@ -1,0 +1,29 @@
+<style>
+    table, th, td {
+      border: 1px solid;
+    }
+    </style>
+<h2> Employees </h2><a href="/" >Back to add employees</a>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Loop through employees ist -->
+        <% for( i = 0; i < employeesList.length; i++) {
+            %>
+        <tr id=<%=i%>>
+            <!-- Output name from the iterated eployeesList object -->
+            <td class="row-data"><%= employeesList[i].name %></td>
+            <!-- Output quote from the iterated eployeesList object -->
+            <td class="row-data"><%= employeesList[i].mobile %></td>
+            <td><button class="update-button" onclick="updateItem(event)">Update</button> &nbsp;<button onclick="deletItem(event)">Delete</button></td>
+        </tr>
+        <% } %>
+    </tbody>
+</table>
+<script src="/main.js"></script>

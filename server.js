@@ -26,8 +26,14 @@ const httpServer = http.createServer(app);
 
 /** Takes care of JSON data */
 app.use(express.json());
+app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}));
-
+/**Rendering the HTML -  Embedded JavaScript (EJS)  */
+app.set('view engine', 'ejs')
+app.use(express.static('public'))
+app.get('/', (req, res)=> {
+  res.sendFile(__dirname + '/index.html')
+})
 app.get('/listUsers', function (req, res) {
     fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
     //    console.log( data );
@@ -35,10 +41,11 @@ app.get('/listUsers', function (req, res) {
     });
  });
 
- app.get('/listEmployees', auth, function (req, res) {  
+ app.get('/listEmployees', function (req, res) {  
     try {
         employeeModel.find({}, (err, employees) => {
-            res.send(employees);
+            //res.send(employees);
+            res.render('index.ejs', { employeesList: employees })
         });
     } catch (error) {
       res.status(500).send(error);
@@ -46,19 +53,46 @@ app.get('/listUsers', function (req, res) {
  });
 
  app.post('/addEmployee', function (req, res) {
-    const employee = new employeeModel({
-        name: "Bala",
-        mobile: "9976664488"
-    });
+  //console.log(req.body)
+    const employee = new employeeModel(req.body);
   
     try {
       employee.save();
-      res.send(user);
+      //res.send(employee);
+      res.redirect('/listEmployees')
     } catch (error) {
       res.status(500).send(error);
     }
  });
-
+ app.put('/updateEmployee', function (req, res) {
+  //console.log(req.body)
+  try {
+      employeeModel.findOneAndUpdate({name:req.body.name}, {
+        $set: {
+          name: "Vithal",
+          mobile: "99999999999"
+        }
+      },
+      {
+        upsert: true
+      }).then(result => {
+        console.log(result);
+        //res.redirect('/listEmployees')
+          
+      });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+ });
+ app.delete('/deleteEmployee', (req, res) => {
+  employeeModel.deleteOne(
+    { name: req.body.name }
+  )
+    .then(result => {
+      res.send(req.body.name+" got deleted");
+    })
+    .catch(error => console.error(error))
+})
  app.post("/login", (req, res) => {
   // Validate User Here
   // Then generate JWT Token
